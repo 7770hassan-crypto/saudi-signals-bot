@@ -1,11 +1,18 @@
+import pandas as pd
+
+def safe_float(x):
+    if isinstance(x, pd.Series):
+        return float(x.values[0])
+    return float(x)
+
 def signal(data):
     if len(data) < 5:
         return None
 
-    close = float(data['Close'].iloc[-1])
-    open_ = float(data['Open'].iloc[-1])
-    high = float(data['High'].iloc[-1])
-    low = float(data['Low'].iloc[-1])
+    close = safe_float(data['Close'].iloc[-1])
+    open_ = safe_float(data['Open'].iloc[-1])
+    high = safe_float(data['High'].iloc[-1])
+    low = safe_float(data['Low'].iloc[-1])
 
     prev_high = float(data['High'].iloc[-5:-1].max())
     prev_low = float(data['Low'].iloc[-5:-1].min())
