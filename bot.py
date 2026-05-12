@@ -9,16 +9,16 @@ bot = Bot(token=TOKEN)
 
 async def run():
 
-    # 🔔 رسالة تشغيل البوت
+    # 🔵 رسالة تشغيل
     await bot.send_message(
         chat_id=CHAT_ID,
         text="✅ البوت شغال الآن ويبحث عن الفرص"
     )
 
-    # 🔍 رسالة اختبار الفحص
+    # 🟡 رسالة اختبار الفحص
     await bot.send_message(
         chat_id=CHAT_ID,
-        text="🔍 البوت يفحص السوق الآن..."
+        text="🟡 النظام يعمل ويفحص الاختراقات"
     )
 
     while True:
