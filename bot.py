@@ -9,6 +9,7 @@ bot = Bot(token=TOKEN)
 
 async def run():
 
+    # 🔔 رسالة تشغيل
     await bot.send_message(
         chat_id=CHAT_ID,
         text="✅ البوت شغال الآن ويبحث عن الفرص"
