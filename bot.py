@@ -4,35 +4,55 @@ from telegram import Bot
 from config import TOKEN, CHAT_ID
 from strategy import signal
 from stocks import stocks
-from datetime import datetime
 
 bot = Bot(token=TOKEN)
 
 async def run():
+
+    # ✅ رسالة تشغيل
+    await bot.send_message(
+        chat_id=CHAT_ID,
+        text="✅ البوت شغال الآن ويبحث عن الفرص"
+    )
+
     while True:
+
         for stock in stocks:
 
-            data = yf.download(stock + ".SR", period="5d", interval="1d")
+            try:
+                data = yf.download(
+                    stock,
+                    period="5d",
+                    interval="1h",
+                    progress=False
+                )
 
-            if data.empty:
-                continue
+                result = signal(data)
 
-            result = signal(data)
+                if result:
 
-            if result:
-                text = f"""
-📊 إشارة جديدة
+                    text = f"""
+🔥 إشارة جديدة
 
-📅 {datetime.now().date()}
-📈 السهم: {stock}
-💰 الدخول: {result['entry']}
-🎯 TP1: {result['tp1']}
-🎯 TP2: {result['tp2']}
-🛑 SL: {result['sl']}
+📊 السهم: {stock}
+📈 النوع: {result['type']}
+
+💰 سعر الدخول: {result['entry']}
+
+🎯 الهدف الأول: {result['tp1']}
+🎯 الهدف الثاني: {result['tp2']}
+
+🛑 وقف الخسارة: {result['sl']}
 """
 
-                await bot.send_message(chat_id=CHAT_ID, text=text)
+                    await bot.send_message(
+                        chat_id=CHAT_ID,
+                        text=text
+                    )
 
-        await asyncio.sleep(3600)
+            except Exception as e:
+                print(f"خطأ في {stock}: {e}")
+
+        await asyncio.sleep(300)
 
 asyncio.run(run())
