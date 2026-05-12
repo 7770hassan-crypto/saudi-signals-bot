@@ -9,7 +9,6 @@ bot = Bot(token=TOKEN)
 
 async def run():
 
-    # ✅ رسالة تشغيل
     await bot.send_message(
         chat_id=CHAT_ID,
         text="✅ البوت شغال الآن ويبحث عن الفرص"
@@ -31,27 +30,25 @@ async def run():
 
                 if result:
 
-                    text = f"""
-🔥 إشارة جديدة
+                    message = f"""
+🔥 إشارة تداول
 
 📊 السهم: {stock}
 📈 النوع: {result['type']}
+💰 الدخول: {result['entry']}
 
-💰 سعر الدخول: {result['entry']}
-
-🎯 الهدف الأول: {result['tp1']}
-🎯 الهدف الثاني: {result['tp2']}
-
+🎯 الهدف 1: {result['tp1']}
+🎯 الهدف 2: {result['tp2']}
 🛑 وقف الخسارة: {result['sl']}
 """
 
                     await bot.send_message(
                         chat_id=CHAT_ID,
-                        text=text
+                        text=message
                     )
 
             except Exception as e:
-                print(f"خطأ في {stock}: {e}")
+                print(f"{stock} Error: {e}")
 
         await asyncio.sleep(300)
 
