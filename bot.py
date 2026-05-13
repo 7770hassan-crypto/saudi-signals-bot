@@ -11,53 +11,56 @@ async def run():
 
     await bot.send_message(
         chat_id=CHAT_ID,
-        text="✅ البوت شغال الآن ويبحث عن أفضل الفرص"
+        text="🔍 البوت يفحص السوق الآن..."
     )
 
-    best_stock = None
-    best_score = 0
+    candidates = []
 
-    while True:
+    for stock in stocks:
 
-        best_stock = None
-        best_score = 0
-
-        for stock in stocks:
-
-            try:
-                data = yf.download(
-                    stock,
-                    period="5d",
-                    interval="1h",
-                    progress=False
-                )
-
-                score = score_stock(data)
-
-                if score and score > best_score:
-                    best_score = score
-                    best_stock = stock
-
-            except Exception as e:
-                print(f"{stock} Error: {e}")
-
-        # 🔥 إرسال أفضل سهم فقط
-        if best_stock:
-
-            message = f"""
-🔥 أفضل سهم الآن
-
-📊 السهم: {best_stock}
-⭐ القوة: {best_score}
-
-📈 فرصة محتملة قوية في السوق
-"""
-
-            await bot.send_message(
-                chat_id=CHAT_ID,
-                text=message
+        try:
+            data = yf.download(
+                stock,
+                period="5d",
+                interval="30m",
+                progress=False
             )
 
-        await asyncio.sleep(300)
+            if data is None or data.empty:
+                continue
+
+            score = score_stock(data)
+
+            if score:
+                candidates.append((stock, score))
+
+        except Exception as e:
+            print(f"{stock} Error: {e}")
+
+    # 🔥 ترتيب أفضل الأسهم
+    candidates.sort(key=lambda x: x[1], reverse=True)
+
+    top3 = candidates[:3]
+
+    if top3:
+
+        msg = "🔥 أفضل الفرص الآن قبل إغلاق السوق\n\n"
+
+        for i, (stock, score) in enumerate(top3, 1):
+            msg += f"{i}- {stock} | القوة: {score}\n"
+
+        msg += "\n📊 إشارات لحظية مبنية على الاختراق والزخم"
+
+        await bot.send_message(
+            chat_id=CHAT_ID,
+            text=msg
+        )
+
+    else:
+
+        await bot.send_message(
+            chat_id=CHAT_ID,
+            text="🟡 لا توجد فرص قوية حالياً في السوق"
+        )
 
 asyncio.run(run())
