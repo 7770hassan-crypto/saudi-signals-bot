@@ -1,62 +1,21 @@
-import asyncio
-import yfinance as yf
 from telegram import Bot
-from config import TOKEN, CHAT_ID
-from strategy import signal
-from stocks import stocks
+import asyncio
+
+TOKEN = "YOUR_BOT_TOKEN"
+CHAT_ID = "YOUR_CHAT_ID"
 
 bot = Bot(token=TOKEN)
 
-async def run():
-
-    # 🔵 رسالة تشغيل
+async def send_test():
     await bot.send_message(
         chat_id=CHAT_ID,
-        text="✅ البوت شغال الآن ويبحث عن الفرص"
+        text=
+        "🚀 تنبيه تجريبي من النظام VIP 🚀\n\n"
+        "📊 البوت يعمل الآن ويراقب السوق بشكل لحظي\n"
+        "⚡ يتم فحص الاختراقات والزخم والسيولة\n"
+        "🔥 متابعة الفرص القوية في السوق\n\n"
+        "⛔️ للتجربة والاختبار فقط — ليست توصية شراء أو بيع"
     )
 
-    # 🟡 رسالة اختبار الفحص
-    await bot.send_message(
-        chat_id=CHAT_ID,
-        text="🟡 النظام يعمل ويفحص الاختراقات"
-    )
+asyncio.run(send_test())
 
-    while True:
-
-        for stock in stocks:
-
-            try:
-                data = yf.download(
-                    stock,
-                    period="5d",
-                    interval="1h",
-                    progress=False
-                )
-
-                result = signal(data)
-
-                if result:
-
-                    message = f"""
-🔥 إشارة تداول
-
-📊 السهم: {stock}
-📈 النوع: {result['type']}
-💰 الدخول: {result['entry']}
-
-🎯 الهدف 1: {result['tp1']}
-🎯 الهدف 2: {result['tp2']}
-🛑 وقف الخسارة: {result['sl']}
-"""
-
-                    await bot.send_message(
-                        chat_id=CHAT_ID,
-                        text=message
-                    )
-
-            except Exception as e:
-                print(f"{stock} Error: {e}")
-
-        await asyncio.sleep(300)
-
-asyncio.run(run())
