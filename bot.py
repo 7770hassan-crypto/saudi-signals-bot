@@ -2,26 +2,25 @@ import asyncio
 import yfinance as yf
 from telegram import Bot
 from config import TOKEN, CHAT_ID
-from strategy import signal
+from strategy import score_stock
 from stocks import stocks
 
 bot = Bot(token=TOKEN)
 
 async def run():
 
-    # 🔵 رسالة تشغيل
     await bot.send_message(
         chat_id=CHAT_ID,
-        text="✅ البوت شغال الآن ويبحث عن الفرص"
+        text="✅ البوت شغال الآن ويبحث عن أفضل الفرص"
     )
 
-    # 🟡 رسالة اختبار الفحص
-    await bot.send_message(
-        chat_id=CHAT_ID,
-        text="🟡 النظام يعمل ويفحص الاختراقات"
-    )
+    best_stock = None
+    best_score = 0
 
     while True:
+
+        best_stock = None
+        best_score = 0
 
         for stock in stocks:
 
@@ -33,29 +32,31 @@ async def run():
                     progress=False
                 )
 
-                result = signal(data)
+                score = score_stock(data)
 
-                if result:
-
-                    message = f"""
-🔥 إشارة تداول
-
-📊 السهم: {stock}
-📈 النوع: {result['type']}
-💰 الدخول: {result['entry']}
-
-🎯 الهدف 1: {result['tp1']}
-🎯 الهدف 2: {result['tp2']}
-🛑 وقف الخسارة: {result['sl']}
-"""
-
-                    await bot.send_message(
-                        chat_id=CHAT_ID,
-                        text=message
-                    )
+                if score and score > best_score:
+                    best_score = score
+                    best_stock = stock
 
             except Exception as e:
                 print(f"{stock} Error: {e}")
+
+        # 🔥 إرسال أفضل سهم فقط
+        if best_stock:
+
+            message = f"""
+🔥 أفضل سهم الآن
+
+📊 السهم: {best_stock}
+⭐ القوة: {best_score}
+
+📈 فرصة محتملة قوية في السوق
+"""
+
+            await bot.send_message(
+                chat_id=CHAT_ID,
+                text=message
+            )
 
         await asyncio.sleep(300)
 
