@@ -1,7 +1,7 @@
 import pandas as pd
 
-def signal(data):
-    if data is None or len(data) < 40:
+def score_stock(data):
+    if data is None or len(data) < 30:
         return None
 
     try:
@@ -13,41 +13,20 @@ def signal(data):
         volume = float(data['Volume'].iloc[-1])
         avg_volume = float(data['Volume'].rolling(10).mean().iloc[-1])
 
-        # 📊 قرب الاختراق
-        near_resistance = close >= high_20 * 0.995
-        breakout = close > high_20
+        if avg_volume == 0:
+            return None
 
-        near_support = close <= low_20 * 1.005
-        breakdown = close < low_20
+        breakout_score = (close / high_20) * 100
+        volume_score = volume / avg_volume
+        momentum = (close - low_20) / low_20 * 100
 
-        # =========================
-        # 🔥 BUY (30m momentum)
-        # =========================
-        if (breakout or near_resistance) and volume >= avg_volume * 0.9:
+        total_score = breakout_score + (volume_score * 10) + momentum
 
-            return {
-                "type": "30M BREAKOUT BUY",
-                "entry": close,
-                "tp1": round(close * 1.015, 2),
-                "tp2": round(close * 1.03, 2),
-                "sl": round(low_20, 2)
-            }
-
-        # =========================
-        # 🔥 SELL
-        # =========================
-        if (breakdown or near_support) and volume >= avg_volume * 0.9:
-
-            return {
-                "type": "30M BREAKDOWN SELL",
-                "entry": close,
-                "tp1": round(close * 0.985, 2),
-                "tp2": round(close * 0.97, 2),
-                "sl": round(high_20, 2)
-            }
+        if close >= high_20 * 0.995:
+            return round(total_score, 2)
 
         return None
 
     except Exception as e:
-        print("Strategy Error:", e)
+        print("score_stock error:", e)
         return None
