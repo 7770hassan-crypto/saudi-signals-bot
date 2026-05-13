@@ -6,59 +6,50 @@ def signal(data):
 
     try:
         close = float(data['Close'].iloc[-1])
+        high = float(data['High'].iloc[-1])
+        low = float(data['Low'].iloc[-1])
+
+        # 📊 مقاومة ودعم حقيقي (آخر 20 شمعة)
+        resistance = float(data['High'].iloc[-20:].max())
+        support = float(data['Low'].iloc[-20:].min())
+
+        # 📊 متوسط حجم بسيط
         volume = float(data['Volume'].iloc[-1])
-        avg_volume = float(data['Volume'].rolling(20).mean().iloc[-1])
+        avg_volume = float(data['Volume'].rolling(10).mean().iloc[-1])
 
         # =========================
-        # 📊 Daily Breakout (20 candles)
+        # 🔥 قرب الاختراق (مهم جدًا مثل المنصات)
         # =========================
-        daily_high = float(data['High'].rolling(20).max().iloc[-1])
-        daily_low = float(data['Low'].rolling(20).min().iloc[-1])
+        near_breakout_up = close >= resistance * 0.997  # قريب جدًا من الكسر
+        breakout_up = close > resistance
+
+        near_breakout_down = close <= support * 1.003
+        breakout_down = close < support
 
         # =========================
-        # 📊 Weekly Breakout (approx 100 candles)
+        # 📈 BUY
         # =========================
-        weekly_high = float(data['High'].rolling(100).max().iloc[-1])
-        weekly_low = float(data['Low'].rolling(100).min().iloc[-1])
-
-        # =========================
-        # 📊 Monthly Breakout (approx 400 candles)
-        # =========================
-        monthly_high = float(data['High'].rolling(400).max().iloc[-1])
-        monthly_low = float(data['Low'].rolling(400).min().iloc[-1])
-
-        # =========================
-        # 🔥 BUY CONDITIONS
-        # =========================
-        if (
-            close > daily_high or
-            close > weekly_high or
-            close > monthly_high
-        ) and volume > avg_volume:
+        if (breakout_up or near_breakout_up) and volume >= avg_volume * 0.8:
 
             return {
                 "type": "BREAKOUT BUY",
                 "entry": close,
-                "tp1": round(close * 1.03, 2),
-                "tp2": round(close * 1.06, 2),
-                "sl": round(close * 0.97, 2)
+                "tp1": round(close * 1.02, 2),
+                "tp2": round(close * 1.05, 2),
+                "sl": round(support, 2)
             }
 
         # =========================
-        # 🔥 SELL CONDITIONS
+        # 📉 SELL
         # =========================
-        if (
-            close < daily_low or
-            close < weekly_low or
-            close < monthly_low
-        ) and volume > avg_volume:
+        if (breakout_down or near_breakout_down) and volume >= avg_volume * 0.8:
 
             return {
-                "type": "BREAKOUT SELL",
+                "type": "BREAKDOWN SELL",
                 "entry": close,
-                "tp1": round(close * 0.97, 2),
-                "tp2": round(close * 0.94, 2),
-                "sl": round(close * 1.02, 2)
+                "tp1": round(close * 0.98, 2),
+                "tp2": round(close * 0.95, 2),
+                "sl": round(resistance, 2)
             }
 
         return None
