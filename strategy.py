@@ -22,7 +22,8 @@ def score_stock(data):
 
         total_score = breakout_score + (volume_score * 10) + momentum
 
-        if close >= high_20 * 0.995:
+        # 🔥 خففنا الشرط هنا عشان يعطي إشارات أكثر
+        if close >= high_20 * 0.99:
             return round(total_score, 2)
 
         return None
