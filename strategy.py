@@ -18,10 +18,10 @@ def score_stock(data):
         if avg_volume == 0:
             return None
 
-        # 🔥 نسبة النشاط والسيولة
+        # 🔥 نسبة السيولة
         volume_ratio = volume / avg_volume
 
-        # 🔥 قرب السهم من القمة
+        # 🔥 قرب السعر من القمة
         resistance_ratio = close / high_20
 
         # 🔥 الزخم
@@ -34,8 +34,8 @@ def score_stock(data):
             momentum
         )
 
-        # 🔥 فلتر أخف وأنشط
-        if volume_ratio >= 0.7:
+        # 🔥 فلتر نشيط أكثر
+        if volume_ratio >= 0.4:
             return round(score, 2)
 
         return None
@@ -43,4 +43,3 @@ def score_stock(data):
     except Exception as e:
         print("score_stock error:", e)
         return None
-         
