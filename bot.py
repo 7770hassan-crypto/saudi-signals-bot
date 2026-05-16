@@ -1,20 +1,36 @@
 import asyncio
 import yfinance as yf
 from telegram import Bot
+from datetime import datetime
 from config import TOKEN, CHAT_ID
 from strategy import score_stock
 from stocks import stocks
 
 bot = Bot(token=TOKEN)
 
+# ⏰ أوقات السوق
+MARKET_START = 10
+MARKET_END = 15
+
 async def run():
 
-    await bot.send_message(
-        chat_id=CHAT_ID,
-        text="🔥 نظام السيولة يفحص السوق الآن..."
-    )
-
     while True:
+
+        now = datetime.now()
+
+        # 🚫 خارج وقت السوق
+        if now.hour < MARKET_START or now.hour >= MARKET_END:
+
+            print("السوق مغلق")
+
+            await asyncio.sleep(1800)
+            continue
+
+        # 🔥 داخل وقت السوق
+        await bot.send_message(
+            chat_id=CHAT_ID,
+            text="🔥 نظام السيولة يفحص السوق الآن..."
+        )
 
         candidates = []
 
@@ -40,7 +56,7 @@ async def run():
             except Exception as e:
                 print(f"{stock} Error: {e}")
 
-        # 🔥 ترتيب الأسهم
+        # 📊 ترتيب الأسهم
         candidates.sort(key=lambda x: x[1], reverse=True)
 
         top3 = candidates[:3]
@@ -61,10 +77,7 @@ async def run():
 
         else:
 
-            await bot.send_message(
-                chat_id=CHAT_ID,
-                text="🟡 السوق هادئ حالياً"
-            )
+            print("السوق هادئ")
 
         await asyncio.sleep(300)
 
