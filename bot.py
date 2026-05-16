@@ -8,9 +8,13 @@ from stocks import stocks
 
 bot = Bot(token=TOKEN)
 
-# ⏰ أوقات السوق
+# ⏰ وقت السوق السعودي
 MARKET_START = 10
 MARKET_END = 15
+
+# 📅 أيام التداول
+TRADING_DAYS = [6, 0, 1, 2, 3]
+# الأحد=6 | الاثنين=0 | الثلاثاء=1 | الأربعاء=2 | الخميس=3
 
 async def run():
 
@@ -18,15 +22,23 @@ async def run():
 
         now = datetime.now()
 
-        # 🚫 خارج وقت السوق
-        if now.hour < MARKET_START or now.hour >= MARKET_END:
+        current_hour = now.hour
+        current_day = now.weekday()
 
-            print("السوق مغلق")
+        # 🚫 إذا السوق مغلق
+        if (
+            current_day not in TRADING_DAYS
+            or current_hour < MARKET_START
+            or current_hour >= MARKET_END
+        ):
 
+            print("السوق السعودي مغلق")
+
+            # ⏳ انتظر 30 دقيقة
             await asyncio.sleep(1800)
             continue
 
-        # 🔥 داخل وقت السوق
+        # 🔥 السوق مفتوح
         await bot.send_message(
             chat_id=CHAT_ID,
             text="🔥 نظام السيولة يفحص السوق الآن..."
@@ -74,10 +86,6 @@ async def run():
                 chat_id=CHAT_ID,
                 text=msg
             )
-
-        else:
-
-            print("السوق هادئ")
 
         await asyncio.sleep(300)
 
