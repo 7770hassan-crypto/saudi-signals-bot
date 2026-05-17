@@ -1,7 +1,11 @@
 import asyncio
 import yfinance as yf
+
 from telegram import Bot
+
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from config import TOKEN, CHAT_ID
 from strategy import score_stock
 from stocks import stocks
@@ -13,19 +17,20 @@ MARKET_START = 10
 MARKET_END = 15
 
 # 📅 أيام التداول
-TRADING_DAYS = [6, 0, 1, 2, 3]
 # الأحد=6 | الاثنين=0 | الثلاثاء=1 | الأربعاء=2 | الخميس=3
+TRADING_DAYS = [6, 0, 1, 2, 3]
 
 async def run():
 
     while True:
 
-        now = datetime.now()
+        # 🇸🇦 توقيت السعودية الحقيقي
+        now = datetime.now(ZoneInfo("Asia/Riyadh"))
 
         current_hour = now.hour
         current_day = now.weekday()
 
-        # 🚫 إذا السوق مغلق
+        # 🚫 السوق مغلق
         if (
             current_day not in TRADING_DAYS
             or current_hour < MARKET_START
@@ -87,6 +92,11 @@ async def run():
                 text=msg
             )
 
+        else:
+
+            print("السوق هادئ")
+
+        # ⏳ تحديث كل 5 دقائق
         await asyncio.sleep(300)
 
 asyncio.run(run())
