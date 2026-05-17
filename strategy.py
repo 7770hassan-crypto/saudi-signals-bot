@@ -2,44 +2,45 @@ import pandas as pd
 
 def score_stock(data):
 
-    if data is None or len(data) < 30:
+    if data is None or len(data) < 20:
         return None
 
     try:
 
         close = float(data['Close'].iloc[-1])
+        open_price = float(data['Open'].iloc[-1])
 
-        high_20 = float(data['High'].iloc[-20:].max())
-        low_20 = float(data['Low'].iloc[-20:].min())
+        high_10 = float(data['High'].iloc[-10:].max())
+        low_10 = float(data['Low'].iloc[-10:].min())
 
         volume = float(data['Volume'].iloc[-1])
-        avg_volume = float(data['Volume'].rolling(10).mean().iloc[-1])
+        avg_volume = float(data['Volume'].rolling(5).mean().iloc[-1])
 
         if avg_volume == 0:
             return None
 
-        # 🔥 نسبة السيولة
+        # 🔥 نسبة النشاط
         volume_ratio = volume / avg_volume
 
-        # 🔥 قرب السعر من القمة
-        resistance_ratio = close / high_20
+        # 🔥 نسبة الحركة
+        move_percent = ((close - open_price) / open_price) * 100
 
-        # 🔥 الزخم
-        momentum = ((close - low_20) / low_20) * 100
+        # 🔥 قرب القمة
+        high_ratio = close / high_10
 
         # 🔥 التقييم النهائي
         score = (
-            (volume_ratio * 40) +
-            (resistance_ratio * 40) +
-            momentum
+            (volume_ratio * 50) +
+            (move_percent * 30) +
+            (high_ratio * 20)
         )
 
-        # 🔥 فلتر نشيط أكثر
-        if volume_ratio >= 0.4:
+        # 🔥 فلتر نشاط خفيف
+        if volume_ratio >= 0.2:
             return round(score, 2)
 
         return None
 
     except Exception as e:
-        print("score_stock error:", e)
+        print("Radar Error:", e)
         return None
